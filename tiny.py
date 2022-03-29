@@ -94,7 +94,7 @@ checkpoint_prefix = os.path.join(checkpoint_dir, "chkpt_{epoch}")
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath = checkpoint_prefix, save_weights_only = True)
 
 EPOCHS = 2
-history = model.fit(dataset, epochs = EPOCHS, callbacks = [checkpoint_callback])
+#history = model.fit(dataset, epochs = EPOCHS, callbacks = [checkpoint_callback])
 
 tf.train.latest_checkpoint(checkpoint_dir)
 
