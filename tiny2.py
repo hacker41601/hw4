@@ -1,8 +1,10 @@
 import numpy as np
 import torch
 from torch import nn
+from torch import optim
+from torch.utils.data import DataLoader, TensorDataset
 import torch.nn.functional as f
-from torch.utils.data import TensorDataset, DataLoader
+#extract characters
 
 
 # Define recurrent neural network model
@@ -46,7 +48,7 @@ def predict(model, character):
     character_input = torch.from_numpy(character_input)
     out, hidden = model(character_input)
 
-    prob = nn.functional.softmax(out[-1], dim=0).data
+    prob = nn.f.softmax(out[-1], dim=0).data
     character_index = torch.max(prob, dim=0)[1].item()
 
     return intChar[character_index], hidden
@@ -68,8 +70,7 @@ input_sequence = []
 target_sequence = []
 sentences = []
 # Hyperparamters
-epochs = 50
-print_frequency = 50  # Loss print frequency
+epochs = 30
 batch = 64
 
 # Read data
@@ -101,13 +102,14 @@ for i in range(len(input_sequence)):
     input_sequence[i] = create_one_hot(input_sequence[i], vocab_size)
 
 # Batch data
+#/Users/monynichkiem/Desktop/hw4/tiny2.py:104: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at  /Users/distiller/project/pytorch/torch/csrc/utils/tensor_new.cpp:210.)
 input_tensor = torch.FloatTensor(input_sequence)
 input_tensor = torch.reshape(input_tensor, (len(input_tensor), len(sentences[0])-1, vocab_size))
 training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
 trainLoader = DataLoader(training, batch_size=batch)
 
 # Set up model, loss, and optimizers
-model = RNNModel(vocab_size, vocab_size, 600, 2)
+model = RNNModel(vocab_size, vocab_size, 500, 1)
 loss = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
@@ -124,8 +126,7 @@ for epoch in range(epochs):
         lossValue = loss(output, y.view(-1).long())
         lossValue.backward()
         optimizer.step()
-        if count % print_frequency == 0:
-            print("Loss: {:.4f}".format(lossValue.item()))
+        print("Loss: {:.4f}".format(lossValue.item()))
         count += 1
 
 # Output
