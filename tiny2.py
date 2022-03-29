@@ -4,31 +4,34 @@ from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader, TensorDataset
 import torch.nn.functional as f
-#extract characters
 
+#read in
+file = open("tiny-shakespeare.txt", "r").read()
+#vocab section
+#extract characters
+characters = list(set(file))
+intChar = dict(enumerate(characters))
+charInt = {character: index for index, character in intChar.items()}
+vocab_size = len(charInt)
 
 # Define recurrent neural network model
 class RNNModel(nn.Module):
-    # Define layer information
     def __init__(self, input_size, output_size, hidden_size, num_layers):
         super(RNNModel, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        # Default batch index is 1 and not 0
-        # batch_first = true -> (batch, sequence, word)
-        self.rnn = nn.RNN(input_size, hidden_size, num_layers, batch_first=True)
-        # This is to make sure that our output dimension is correct
+        
+        self.rnn = nn.RNN(input_size, hidden_size, num_layers, batch_first = True)
         self.fc = nn.Linear(hidden_size, output_size)
 
     # Define how inputs translate into outputs
     def forward(self, x):
-        # hidden_state = self.init_hidden()
+        #hidden_state = self.init_hidden()
         output, hidden_state = self.rnn(x)
-        # Use this to deal with the extra dimension from having a batch
+        #take off one to deal with extra dim from batch
         output = output.contiguous().view(-1, self.hidden_size)
         output = self.fc(output)
         return output, hidden_state
-
 
 # Create one-hot vector
 def create_one_hot(sequence, v_size):
@@ -38,10 +41,8 @@ def create_one_hot(sequence, v_size):
     encoding = np.zeros((1, len(sequence), v_size), dtype=np.float32)
     for i in range(len(sequence)):
         encoding[0, i, sequence[i]] = 1
-    return encoding  # Return one-hot sequence
+    return encoding
 
-
-# Prediction
 def predict(model, character):
     character_input = np.array([charInt[c] for c in character])
     character_input = create_one_hot(character_input, vocab_size)
@@ -52,9 +53,7 @@ def predict(model, character):
     character_index = torch.max(prob, dim=0)[1].item()
 
     return intChar[character_index], hidden
-
-
-# Sample
+    
 def sample(model, out_len, start='QUEEN:'):
     characters = [ch for ch in start]
     current_size = out_len - len(characters)
@@ -65,24 +64,17 @@ def sample(model, out_len, start='QUEEN:'):
     return ''.join(characters)
 
 
-# Initialize variables
+#initialize variables
 input_sequence = []
 target_sequence = []
 sentences = []
-# Hyperparamters
+#hyperparamters
 epochs = 30
 batch = 64
 
-# Read data
-file = open("tiny-shakespeare.txt", "r").read()
-# Set up vocabulary
-characters = list(set(file))
-intChar = dict(enumerate(characters))
-charInt = {character: index for index, character in intChar.items()}
-vocab_size = len(charInt)
-# Split corpus into segments
+#split corpus into segments
 segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
-# Combine every 4 segments, of length 42, into length 168
+#combine every 4 segments, of length 42, into length 168
 new_segment = ""
 for i in range(len(segments)):
     new_segment += segments[i]
@@ -108,12 +100,11 @@ input_tensor = torch.reshape(input_tensor, (len(input_tensor), len(sentences[0])
 training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
 trainLoader = DataLoader(training, batch_size=batch)
 
-# Set up model, loss, and optimizers
 model = RNNModel(vocab_size, vocab_size, 500, 1)
 loss = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
-# Train
+#Train
 for epoch in range(epochs):
     print("Epoch:", epoch)
     count = 0
