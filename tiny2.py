@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader, TensorDataset
-import torch.nn.functional as f
+import torch.nn.functional as functional
 
 #read in
 file = open("tiny-shakespeare.txt", "r").read()
@@ -33,6 +33,9 @@ class RNNModel(nn.Module):
         output = self.fc(output)
         return output, hidden_state
 
+loss = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters())
+
 # Create one-hot vector
 def create_one_hot(sequence, v_size):
     # Define a matrix of size vocab_size containing all 0's
@@ -49,7 +52,7 @@ def predict(model, character):
     character_input = torch.from_numpy(character_input)
     out, hidden = model(character_input)
 
-    prob = nn.f.softmax(out[-1], dim=0).data
+    prob = nn.functional.softmax(out[-1], dim=0).data
     character_index = torch.max(prob, dim=0)[1].item()
 
     return intChar[character_index], hidden
@@ -101,8 +104,6 @@ training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
 trainLoader = DataLoader(training, batch_size=batch)
 
 model = RNNModel(vocab_size, vocab_size, 500, 1)
-loss = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
 
 #Train
 for epoch in range(epochs):
