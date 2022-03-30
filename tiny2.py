@@ -32,6 +32,10 @@ class RNNModel(nn.Module):
         output = output.contiguous().view(-1, self.hidden_size)
         output = self.fc(output)
         return output, hidden_state
+        
+    def init_hidden(self):
+        hidden = torch.zeros(self.num_layers, 1, self.hidden_size)
+        return hidden
 
 # Create one-hot vector
 def create_one_hot(sequence, v_size):
