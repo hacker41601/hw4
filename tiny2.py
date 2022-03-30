@@ -11,12 +11,22 @@ batch = 64
 
 #read in
 file = open("tiny-shakespeare.txt", "r").read()
-#vocab section
 #extract characters
 characters = list(set(file))
+#vocab section
 intChar = dict(enumerate(characters))
 charInt = {character: index for index, character in intChar.items()}
+#print(intChar)
 vocab_size = len(charInt)
+
+#functions--------------------------------------------------------------------------------
+def create_one_hot(sequence, vocab_size):
+    #defines a matrix of vocab_size with all 0's os use np.zeros
+    #dim = batch size x seq lenth x vocab size
+    encoding = np.zeros((1, len(sequence), vocab_size), dtype=np.float32)
+    for i in range(len(sequence)):
+        encoding[0, i, sequence[i]] = 1
+    return encoding
 
 # Define recurrent neural network model
 class RNNModel(nn.Module):
@@ -41,14 +51,6 @@ class RNNModel(nn.Module):
         hidden = torch.zeros(self.num_layers, 1, self.hidden_size)
         return hidden
 
-def create_one_hot(sequence, vocab_size):
-    #defines a matrix of vocab_size with all 0's os use np.zeros
-    #dim = batch size x seq lenth x vocab size
-    encoding = np.zeros((1, len(sequence), vocab_size), dtype=np.float32)
-    for i in range(len(sequence)):
-        encoding[0, i, sequence[i]] = 1
-    return encoding
-
 def predict(model, character):
     character_input = np.array([charInt[c] for c in character])
     character_input = create_one_hot(character_input, vocab_size)
@@ -69,11 +71,15 @@ def sample(model, out_len, start='QUEEN:'):
 
     return ''.join(characters)
 
+#implementation----------------------------------------------------------------------------
+model = RNNModel(vocab_size, vocab_size, 500, 1)
+loss = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters())
+
 #initialize variables
 input_sequence = []
 target_sequence = []
 sentences = []
-
 #split corpus into segments
 segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
 #combine every 4 segments, of length 42, into length 168
@@ -101,10 +107,6 @@ input_tensor = torch.FloatTensor(input_sequence)
 input_tensor = torch.reshape(input_tensor, (len(input_tensor), len(sentences[0])-1, vocab_size))
 training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
 trainLoader = DataLoader(training, batch_size=batch)
-
-model = RNNModel(vocab_size, vocab_size, 500, 1)
-loss = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
 
 #Train
 for epoch in range(epochs):
