@@ -131,6 +131,8 @@ for epoch in range(epochs):
         optimizer.step()
         print("Loss: {:.4f}".format(lossValue.item()))
         count += 1
+        
+    print("Final Loss of This Epoch: {:.4f}".format(lossValue.item()))
     
 print(sample(model, 100))
 print("Final Loss: {:.4f}".format(lossValue.item()))
