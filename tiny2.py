@@ -33,9 +33,6 @@ class RNNModel(nn.Module):
         output = self.fc(output)
         return output, hidden_state
 
-loss = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
-
 # Create one-hot vector
 def create_one_hot(sequence, v_size):
     # Define a matrix of size vocab_size containing all 0's
@@ -104,6 +101,8 @@ training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
 trainLoader = DataLoader(training, batch_size=batch)
 
 model = RNNModel(vocab_size, vocab_size, 500, 1)
+loss = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters())
 
 #Train
 for epoch in range(epochs):
@@ -123,4 +122,3 @@ for epoch in range(epochs):
 
 # Output
 print(sample(model, 100))
-
