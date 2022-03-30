@@ -5,6 +5,10 @@ from torch import optim
 from torch.utils.data import DataLoader, TensorDataset
 import torch.nn.functional as functional
 
+#hyperparamters
+epochs = 30
+batch = 64
+
 #read in
 file = open("tiny-shakespeare.txt", "r").read()
 #vocab section
@@ -37,11 +41,9 @@ class RNNModel(nn.Module):
         hidden = torch.zeros(self.num_layers, 1, self.hidden_size)
         return hidden
 
-# Create one-hot vector
 def create_one_hot(sequence, vocab_size):
-    # Define a matrix of size vocab_size containing all 0's
-    # Dimensions: Batch Size x Sequence Length x Vocab Size
-    # Have to do this even if your batch size is 1
+    #defines a matrix of vocab_size with all 0's os use np.zeros
+    #dim = batch size x seq lenth x vocab size
     encoding = np.zeros((1, len(sequence), vocab_size), dtype=np.float32)
     for i in range(len(sequence)):
         encoding[0, i, sequence[i]] = 1
@@ -67,14 +69,10 @@ def sample(model, out_len, start='QUEEN:'):
 
     return ''.join(characters)
 
-
 #initialize variables
 input_sequence = []
 target_sequence = []
 sentences = []
-#hyperparamters
-epochs = 30
-batch = 64
 
 #split corpus into segments
 segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
