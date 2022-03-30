@@ -89,15 +89,18 @@ for i in range(len(segments)):
     if i % 4 == 3:
         sentences.append(new_segment)
         new_segment = ""
-# Set up input and target sequences
+        
+#shifting sequences by 1
 for i in range(len(sentences)):
     input_sequence.append(sentences[i][:-1])
     target_sequence.append(sentences[i][1:])
-# Replace characters with integer values
+    
+#constructing the one hots, replace all chars with ints
 for i in range(len(sentences)):
     input_sequence[i] = [charInt[character] for character in input_sequence[i]]
     target_sequence[i] = [charInt[character] for character in target_sequence[i]]
-# Transform input sequences into one-hots
+
+#input sequences into one-hots
 for i in range(len(input_sequence)):
     input_sequence[i] = create_one_hot(input_sequence[i], vocab_size)
 
