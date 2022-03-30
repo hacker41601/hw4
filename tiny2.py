@@ -73,13 +73,18 @@ def sample(model, out_len, start='QUEEN:'):
 
 #implementation----------------------------------------------------------------------------
 model = RNNModel(vocab_size, vocab_size, 500, 1)
+
+#define loss
 loss = nn.CrossEntropyLoss()
+
+#use Adam again
 optimizer = torch.optim.Adam(model.parameters())
 
 #initialize variables
 input_sequence = []
 target_sequence = []
 sentences = []
+
 #split corpus into segments
 segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
 #combine every 4 segments, of length 42, into length 168
@@ -106,12 +111,12 @@ for i in range(len(input_sequence)):
 
 # Batch data
 #/Users/monynichkiem/Desktop/hw4/tiny2.py:104: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at  /Users/distiller/project/pytorch/torch/csrc/utils/tensor_new.cpp:210.)
+
 input_tensor = torch.FloatTensor(input_sequence)
 input_tensor = torch.reshape(input_tensor, (len(input_tensor), len(sentences[0])-1, vocab_size))
 training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
 trainLoader = DataLoader(training, batch_size=batch)
 
-#Train
 for epoch in range(epochs):
     print("Epoch:", epoch)
     count = 0
@@ -126,6 +131,5 @@ for epoch in range(epochs):
         optimizer.step()
         print("Loss: {:.4f}".format(lossValue.item()))
         count += 1
-
-# Output
+        
 print(sample(model, 100))
