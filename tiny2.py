@@ -38,11 +38,11 @@ class RNNModel(nn.Module):
         return hidden
 
 # Create one-hot vector
-def create_one_hot(sequence, v_size):
+def create_one_hot(sequence, vocab_size):
     # Define a matrix of size vocab_size containing all 0's
     # Dimensions: Batch Size x Sequence Length x Vocab Size
     # Have to do this even if your batch size is 1
-    encoding = np.zeros((1, len(sequence), v_size), dtype=np.float32)
+    encoding = np.zeros((1, len(sequence), vocab_size), dtype=np.float32)
     for i in range(len(sequence)):
         encoding[0, i, sequence[i]] = 1
     return encoding
