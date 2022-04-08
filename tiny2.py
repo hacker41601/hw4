@@ -133,8 +133,6 @@ for epoch in range(epochs):
     print("Epoch:", epoch)
     for x, y in trainLoader:
         optimizer.zero_grad()
-        #x = x
-        #y = y
         output, hidden = model(x)
         lossValue = loss(output, y.view(-1).long())
         lossValue.backward()
