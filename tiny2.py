@@ -81,7 +81,7 @@ def sample(model, out_len, start='QUEEN:'):
     return ''.join(characters)
 
 #implementation----------------------------------------------------------------------------
-model = RNNModel(vocab_size, vocab_size, 500, 2)
+model = RNNModel(vocab_size, vocab_size, 500, 2) #only 1 layer is too simplistic and causes lots of repeats for some reason or 100 in seq length
 
 #define loss
 loss = nn.CrossEntropyLoss()
