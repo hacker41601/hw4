@@ -4,11 +4,20 @@ from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader, TensorDataset
 import torch.nn.functional as functional
+#Author: Monynich Kiem
+#Date: 04/2022
+#Purpose: Tiny Shakespeare - Use an RNN to output text generation with Shakespeare as the training devide
+#Main reference: Dr. Harrison's code as given to us in lecture
+#other references:
+#https://www.kaggle.com/code/sumantindurkhya/text-generation-from-shakespeare-s-play-pytorch/notebook
+#https://www.youtube.com/watch?v=xs6dOWlpQbM
+#https://opendatascience.com/optimizing-pytorch-performance-batch-size-with-pytorch-profiler/
 
 #hyperparamters
 epochs = 30
 batch = 64
 
+#read and split vocab------------------------------------------------------------------------------
 #read in
 file = open("tiny-shakespeare.txt", "r").read()
 #extract characters
@@ -21,14 +30,14 @@ vocab_size = len(charInt)
 
 #functions--------------------------------------------------------------------------------
 def create_one_hot(sequence, vocab_size):
-    #defines a matrix of vocab_size with all 0's os use np.zeros
+    #defines a matrix of vocab_size with all 0's so use np.zeros
     #dim = batch size x seq lenth x vocab size
     encoding = np.zeros((1, len(sequence), vocab_size), dtype=np.float32)
     for i in range(len(sequence)):
         encoding[0, i, sequence[i]] = 1
     return encoding
 
-# Define recurrent neural network model
+#rnn class
 class RNNModel(nn.Module):
     def __init__(self, input_size, output_size, hidden_size, num_layers):
         super(RNNModel, self).__init__()
@@ -38,7 +47,7 @@ class RNNModel(nn.Module):
         self.rnn = nn.RNN(input_size, hidden_size, num_layers, batch_first = True)
         self.fc = nn.Linear(hidden_size, output_size)
 
-    # Define how inputs translate into outputs
+    #Define how inputs translate into outputs
     def forward(self, x):
         #hidden_state = self.init_hidden()
         output, hidden_state = self.rnn(x)
@@ -85,9 +94,10 @@ input_sequence = []
 target_sequence = []
 sentences = []
 
-#split corpus into segments
-segments = [file[pos:pos+100] for pos, i in enumerate(list(file)) if pos % 100 == 0]
-#combine every 4 segments, of length 42, into length 168
+#split into segments that can be used
+segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
+#combine every 4 segments, of length 42, into length 100
+#print(len(segments)) #11154
 new_segment = ""
 for i in range(len(segments)):
     new_segment += segments[i]
@@ -95,7 +105,7 @@ for i in range(len(segments)):
         sentences.append(new_segment)
         new_segment = ""
         
-#shifting sequences by 1
+#shifting sequences by 1, similar to the pseudocode where First became irst so it can predict the next one
 for i in range(len(sentences)):
     input_sequence.append(sentences[i][:-1])
     target_sequence.append(sentences[i][1:])
@@ -104,6 +114,7 @@ for i in range(len(sentences)):
 for i in range(len(sentences)):
     input_sequence[i] = [charInt[character] for character in input_sequence[i]]
     target_sequence[i] = [charInt[character] for character in target_sequence[i]]
+    #converting target_seq into a tensor, for loss only need the int output
 
 #input sequences into one-hots
 for i in range(len(input_sequence)):
@@ -112,6 +123,7 @@ for i in range(len(input_sequence)):
 # Batch data
 #/Users/monynichkiem/Desktop/hw4/tiny2.py:104: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at  /Users/distiller/project/pytorch/torch/csrc/utils/tensor_new.cpp:210.)
 
+#https://opendatascience.com/optimizing-pytorch-performance-batch-size-with-pytorch-profiler/
 input_tensor = torch.FloatTensor(input_sequence)
 input_tensor = torch.reshape(input_tensor, (len(input_tensor), len(sentences[0])-1, vocab_size))
 training = TensorDataset(input_tensor, torch.FloatTensor(target_sequence))
@@ -119,20 +131,17 @@ trainLoader = DataLoader(training, batch_size=batch)
 
 for epoch in range(epochs):
     print("Epoch:", epoch)
-    count = 0
     for x, y in trainLoader:
         optimizer.zero_grad()
-        # Train using GPU
-        x = x
-        y = y
+        #x = x
+        #y = y
         output, hidden = model(x)
         lossValue = loss(output, y.view(-1).long())
         lossValue.backward()
         optimizer.step()
-        #print("Loss: {:.4f}".format(lossValue.item()))
-        count += 1
         
-    print("Final Loss of This Epoch: {:.4f}".format(lossValue.item()))
+    print("Loss of This Epoch: {:.4f}".format(lossValue.item()))
     
 print(sample(model, 100))
 print("Final Loss: {:.4f}".format(lossValue.item()))
+
