@@ -72,7 +72,7 @@ def sample(model, out_len, start='QUEEN:'):
     return ''.join(characters)
 
 #implementation----------------------------------------------------------------------------
-model = RNNModel(vocab_size, vocab_size, 500, 1)
+model = RNNModel(vocab_size, vocab_size, 500, 2)
 
 #define loss
 loss = nn.CrossEntropyLoss()
@@ -86,7 +86,7 @@ target_sequence = []
 sentences = []
 
 #split corpus into segments
-segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
+segments = [file[pos:pos+100] for pos, i in enumerate(list(file)) if pos % 100 == 0]
 #combine every 4 segments, of length 42, into length 168
 new_segment = ""
 for i in range(len(segments)):
@@ -129,7 +129,7 @@ for epoch in range(epochs):
         lossValue = loss(output, y.view(-1).long())
         lossValue.backward()
         optimizer.step()
-        print("Loss: {:.4f}".format(lossValue.item()))
+        #print("Loss: {:.4f}".format(lossValue.item()))
         count += 1
         
     print("Final Loss of This Epoch: {:.4f}".format(lossValue.item()))
