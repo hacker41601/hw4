@@ -95,9 +95,9 @@ target_sequence = []
 sentences = []
 
 #split into segments that can be used
-segments = [file[pos:pos+100] for pos, i in enumerate(list(file)) if pos % 100 == 0]
+segments = [file[pos:pos+51] for pos, i in enumerate(list(file)) if pos % 51 == 0]
 #combine every 4 segments, of length 42, into length 100
-#print(len(segments)) #11154 for 100, 25667 for 42
+print(len(segments)) #11154 for 100, 25667 for 42, 16166 for 69, anything >= 51 works 21871 the loss for 51 is really low at 2.5 ish where as 42 and 100 are at 3.4 smth
 new_segment = ""
 for i in range(len(segments)):
     new_segment += segments[i]
