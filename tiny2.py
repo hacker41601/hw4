@@ -95,9 +95,9 @@ target_sequence = []
 sentences = []
 
 #split into segments that can be used
-segments = [file[pos:pos+42] for pos, i in enumerate(list(file)) if pos % 42 == 0]
+segments = [file[pos:pos+100] for pos, i in enumerate(list(file)) if pos % 100 == 0]
 #combine every 4 segments, of length 42, into length 100
-#print(len(segments)) #11154
+#print(len(segments)) #11154 for 100, 25667 for 42
 new_segment = ""
 for i in range(len(segments)):
     new_segment += segments[i]
